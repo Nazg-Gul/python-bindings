@@ -1,7 +1,11 @@
 #!/usr/bin/python
 
 import math
+import Test
 from math import *
+from Test import *
+
+print TRUE
 
 def Main(arg):
   for i in range(10):

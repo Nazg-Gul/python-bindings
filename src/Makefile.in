@@ -14,7 +14,6 @@ HEADERS =
 SOURCES = \
 	python/iface.c \
 	python/extpy.c \
-	python/import.c \
 	main.c
 
 OBJECTS = ${SOURCES:.c=.o}

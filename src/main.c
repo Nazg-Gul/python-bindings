@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <python/iface.h>
 
-#include <python/import.h>
-
 static py_module_t *module;
 
 PY_METHOD_FORWARD(my_method);
@@ -23,10 +21,6 @@ static void
 test_init (void)
 {
   module = py_module_new (L"Test", L"My first test module", methods);
-
-  PyObject *import = PyCFunction_New (py_import_meth, NULL);
-
-  extpy_dict_set_item_str (module->dict, L"__import__", import);
 
   PyModule_AddIntConstant (module->handle, "TRUE", 1);
   PyModule_AddIntConstant (module->handle, "FALSE", 0);

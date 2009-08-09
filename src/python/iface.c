@@ -6,7 +6,6 @@
  */
 
 #include "iface.h"
-#include "import.h"
 
 #include <wchar.h>
 #include <stdio.h>
@@ -87,21 +86,6 @@ free_methods_list (PyMethodDef *list)
 }
 
 /**
- * Initialize importing stuff
- */
-static void
-init_import (void)
-{
-  PyObject *module, *dict;
-  PyObject *import = PyCFunction_New (py_import_meth, NULL);
-
-  module = PyImport_AddModule ("__builtin__");
-  dict = PyModule_GetDict (module);
-
-  extpy_dict_set_item_str (dict, L"__import__", import);
-}
-
-/**
  * Reutrn string from last slash
  *
  * @param string - string to get substring from
@@ -149,7 +133,7 @@ syspath_append (wchar_t *dirname)
 
   WCS2MBS (mbdirname, dirname);
 
-  mod_sys = PyImport_ImportModule ("sys");/* new ref */
+  mod_sys = PyImport_ImportModule ("sys"); /* new ref */
 
   if (mod_sys)
     {
@@ -346,8 +330,6 @@ python_init (int argc, char **argv, struct _inittab *inittab_modules)
 
   /* Initialize thread support */
   PyEval_InitThreads ();
-
-  init_import ();
 
   init_syspath (first_time);
 
