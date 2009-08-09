@@ -16,7 +16,12 @@
 #  define PROGRAM_NAME "RootProgram"
 #endif
 
+/* Program's name (argv[0]) */
 static wchar_t *progname = NULL;
+
+/* List of created modules */
+static py_module_t **modules = NULL;
+static long modules_count = 0;
 
 /**
  * Converts internal method's definition to Python method definition
@@ -276,6 +281,71 @@ release_global_dictionary (PyObject *dict)
   Py_DECREF (dict);
 }
 
+/**
+ * Register module in list
+ *
+ * @param module - module to be registered
+ */
+static void
+register_module (py_module_t *module)
+{
+  modules = realloc (modules, (modules_count + 1) * sizeof (py_module_t*));
+  modules[modules_count++] = module;
+}
+
+/**
+ * Unregister module from list
+ *
+ * @param module - module to be unregistered
+ */
+static void
+unregister_module (py_module_t *module)
+{
+  long i;
+  int found = 0;
+
+  for (i = 0; i < modules_count; ++i)
+    {
+      if (modules[i] == module)
+        {
+          found = 1;
+          break;
+        }
+    }
+
+  if (found)
+    {
+      /* Shift modules */
+      if (i < modules_count - 1)
+        {
+          modules[i] = modules[modules_count - 1];
+        }
+
+      --modules_count;
+      if (!modules_count)
+        {
+          free (modules);
+          modules = NULL;
+        }
+      else
+        {
+          modules = realloc (modules, modules_count * sizeof (py_module_t*));
+        }
+    }
+}
+
+/**
+ * Unregister all modules from list
+ */
+static void
+unregister_all_modules (void)
+{
+  while (modules)
+    {
+      py_module_free (modules[0]);
+    }
+}
+
 /****
  * Common Python methods
  */
@@ -342,8 +412,12 @@ python_init (int argc, char **argv, struct _inittab *inittab_modules)
 void
 python_done (void)
 {
+  unregister_all_modules ();
+
   /* End python */
   Py_Finalize ();
+
+  SAFE_FREE (progname);
 }
 
 /****
@@ -374,12 +448,16 @@ py_module_new (const wchar_t *name, const wchar_t *descr,
   WCS2MBS (mbname,  name);
   WCS2MBS (mbdescr, descr);
 
+  module->name = wcsdup (name);
+  module->descr = wcsdup (descr);
   module->handle = Py_InitModule3 (mbname, methods_list, mbdescr);
   module->dict = PyModule_GetDict (module->handle);
   module->conv_methods = methods_list;
 
   SAFE_FREE (mbname);
   SAFE_FREE (mbdescr);
+
+  register_module (module);
 
   return module;
 }
@@ -397,8 +475,13 @@ py_module_free (py_module_t *module)
       return;
     }
 
+  unregister_module (module);
+
   free_methods_list (module->conv_methods);
   Py_DECREF (module->handle);
+
+  SAFE_FREE (module->name);
+  SAFE_FREE (module->descr);
 
   SAFE_FREE (module);
 }
@@ -447,6 +530,7 @@ py_script_new_file (const wchar_t *file_name)
 
   if (stat (mbfn, &st))
     {
+      free (mbfn);
       return NULL;
     }
 
@@ -454,6 +538,7 @@ py_script_new_file (const wchar_t *file_name)
 
   if (!file)
     {
+      free (mbfn);
       return NULL;
     }
 
@@ -467,6 +552,7 @@ py_script_new_file (const wchar_t *file_name)
   if (!wcbuf)
     {
       free (buffer);
+      free (mbfn);
       return NULL;
     }
 
@@ -475,6 +561,7 @@ py_script_new_file (const wchar_t *file_name)
 
   free (buffer);
   free (wcbuf);
+  free (mbfn);
 
   return script;
 }
@@ -555,8 +642,8 @@ py_run_script_at_dict (py_script_t *script, PyObject *dict)
       WCS2MBS (mbfn, script->file_name);
     }
 
-  PyDict_SetItemString (dict, "__file__",
-                        PyString_FromString (mbfn ? mbfn : ""));
+  extpy_dict_set_item_str (dict, L"__file__",
+                           PyString_FromString (mbfn ? mbfn : ""));
 
   SAFE_FREE (mbfn);
 

@@ -6,6 +6,7 @@ from math import *
 from Test import *
 
 print TRUE
+print __file__
 
 def Main(arg):
   for i in range(5):

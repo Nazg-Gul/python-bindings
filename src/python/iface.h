@@ -47,6 +47,28 @@ BEGIN_HEADER
     Py_RETURN_NONE; \
   }
 
+#define PY_BEGIN_INITTAB(name) \
+  static struct _inittab name[] = {
+
+#define PY_INITTAB_DEF(name, entry) \
+  {name, entry},
+
+#define PY_END_INITTAB \
+    {NULL, NULL} \
+  };
+
+#define PY_INITTAB_FORWARD(name) \
+  static void \
+  name (void);
+
+#define PY_INITTAB_PROC(proc_name, module_name, doc, methods) \
+  static void \
+  proc_name (void) { \
+    py_module_t *__module = py_module_new (module_name, doc, methods);
+
+#define PY_INITTAB_END_PROC \
+  }
+
 #define PY_PARSE_TUPLE(mask, err_msg, args...)   \
   if (!PyArg_ParseTuple (__args, mask, ##args)) \
     { \

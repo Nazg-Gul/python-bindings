@@ -1,13 +1,5 @@
 #include <stdlib.h>
-#include <python/iface.h>
-
-static py_module_t *module;
-
-PY_METHOD_FORWARD(my_method);
-
-PY_BEGIN_METHMAP(methods)
-  PY_METHMAP_DEF (L"my_method", my_method, METH_VARARGS, L"Some documentation")
-PY_END_METHMAP
+#include "python/iface.h"
 
 PY_METHOD(my_method)
   char *s;
@@ -17,19 +9,18 @@ PY_METHOD(my_method)
   printf ("Method `my_method`: %s\n", s);
 PY_METH_END
 
-static void
-test_init (void)
-{
-  module = py_module_new (L"Test", L"My first test module", methods);
+PY_BEGIN_METHMAP(methods)
+  PY_METHMAP_DEF (L"my_method", my_method, METH_VARARGS, L"Some documentation")
+PY_END_METHMAP
 
-  PyModule_AddIntConstant (module->handle, "TRUE", 1);
-  PyModule_AddIntConstant (module->handle, "FALSE", 0);
-}
+PY_INITTAB_PROC(test_init, L"Test", L"My first test module", methods)
+  PyModule_AddIntConstant (__module->handle, "TRUE", 1);
+  PyModule_AddIntConstant (__module->handle, "FALSE", 0);
+PY_INITTAB_END_PROC
 
-static struct _inittab inittab_modules[] = {
-  {"Test", test_init},
-  {NULL, NULL}
-};
+PY_BEGIN_INITTAB(inittab_modules)
+  PY_INITTAB_DEF ("Test", test_init)
+PY_END_INITTAB
 
 int
 main (int argc, char **argv)
@@ -40,8 +31,6 @@ main (int argc, char **argv)
     }
 
   py_run_file (L"../t/main.py");
-
-  py_module_free (module);
 
   python_done ();
 
