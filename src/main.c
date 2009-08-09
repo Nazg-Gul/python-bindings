@@ -50,7 +50,7 @@ main (int argc, char **argv)
   PyImport_ImportModule ("Test");
 
   script = py_script_new_file (L"../t/main.py");
-  py_run_script (script, module->dict);
+  py_run_script (script);
   py_script_free (script);
 
   py_module_free (module);

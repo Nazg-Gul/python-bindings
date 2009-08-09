@@ -124,7 +124,11 @@ py_script_free_compiled (py_script_t *script);
 
 /* Run Python script */
 PyObject*
-py_run_script (py_script_t *script, PyObject *dict);
+py_run_script_at_dict (py_script_t *script, PyObject *dict);
+
+/* Run Python script */
+PyObject*
+py_run_script (py_script_t *script);
 
 /****
  * Extensions

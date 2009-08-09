@@ -260,6 +260,38 @@ init_syspath (int first_time)
     }
 }
 
+/**
+ * Create a new Python dictionary object
+ *
+ * @return Python dictionary object
+ * @sideeffect allocate memory for output value
+ */
+static PyObject*
+create_global_dictionary (void)
+{
+  PyObject *dict = PyDict_New ();
+
+  PyDict_SetItemString (dict, "__builtins__", PyEval_GetBuiltins ());
+  extpy_dict_set_item_str (dict, L"__name__",
+                           PyString_FromString ( "__main__" ));
+
+  return dict;
+}
+
+/**
+ * Delete a given Python dictionary object
+ *
+ * @param dict - dictionary to b ereleased
+ */
+static void
+release_global_dictionary (PyObject *dict)
+{
+  PyDict_Clear (dict);
+
+  /* Release dictionary */
+  Py_DECREF (dict);
+}
+
 /****
  * Common Python methods
  */
@@ -508,7 +540,7 @@ py_script_free_compiled (py_script_t *script)
  * @return Python eval's result
  */
 PyObject*
-py_run_script (py_script_t *script, PyObject *dict)
+py_run_script_at_dict (py_script_t *script, PyObject *dict)
 {
   char *mbfn = NULL;
 
@@ -547,4 +579,23 @@ py_run_script (py_script_t *script, PyObject *dict)
   SAFE_FREE (mbfn);
 
   return PyEval_EvalCode ((PyCodeObject*)script->compiled, dict, dict);
+}
+
+/**
+ * Run Python script
+ *
+ * @param script - script to be executed
+ * @return Python eval's result
+ */
+PyObject*
+py_run_script (py_script_t *script)
+{
+  PyObject *dict = create_global_dictionary ();
+  PyObject *result;
+
+  result = py_run_script_at_dict (script, dict);
+
+  release_global_dictionary (dict);
+
+  return result;
 }
