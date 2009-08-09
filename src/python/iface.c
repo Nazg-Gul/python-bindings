@@ -17,6 +17,8 @@
 #  define PROGRAM_NAME "RootProgram"
 #endif
 
+static wchar_t *progname = NULL;
+
 /**
  * Converts internal method's definition to Python method definition
  *
@@ -100,12 +102,128 @@ init_import (void)
 }
 
 /**
- * Initialize system paths
+ * Reutrn string from last slash
+ *
+ * @param string - string to get substring from
+ * @return pointer to a string frmo the last slash
+ */
+static wchar_t*
+last_slash (const wchar_t *string)
+{
+  wchar_t *lfslash, *lbslash;
+
+  lfslash = wcsrchr (string, '/');
+  lbslash = wcsrchr (string, '\\');
+
+  if (!lfslash)
+    {
+      return lbslash;
+    }
+  else if (!lbslash)
+    {
+      return lfslash;
+    }
+
+  if ((intptr_t)lfslash < (intptr_t)lbslash)
+    {
+      return lbslash;
+    }
+  else
+    {
+      return lfslash;
+    }
+}
+
+
+/**
+ * Append entry to sis directory
+ *
+ * @param dirname - name of directory to append
  */
 static void
-init_syspath (first_time)
+syspath_append (wchar_t *dirname)
+{
+  PyObject *mod_sys = NULL, *dict = NULL, *path = NULL, *dir = NULL;
+  short ok = 1;
+  char *mbdirname;
+
+  WCS2MBS (mbdirname, dirname);
+
+  mod_sys = PyImport_ImportModule ("sys");/* new ref */
+
+  if (mod_sys)
+    {
+      dict = PyModule_GetDict (mod_sys); /* borrowed ref */
+      path = PyDict_GetItemString (dict, "path"); /* borrowed ref */
+      if (!PyList_Check (path))
+        {
+          ok = 0;
+        }
+    }
+  else
+    {
+      /* cant get the sys module */
+      /* PyErr_Clear(); is called below */
+      ok = 0;
+    }
+
+
+  dir = PyString_FromString (mbdirname);
+  free (mbdirname);
+
+  if (ok && PySequence_Contains (path, dir) == 0)
+    {
+      /* Only add if we need to */
+      if (PyList_Append (path, dir) != 0)
+        {
+          ok = 0; /* append failed */
+        }
+    }
+
+    if ((ok == 0) || PyErr_Occurred ())
+      {
+        fprintf (stderr, "Warning: could import or build sys.path\n");
+      }
+
+  PyErr_Clear ();
+  Py_DECREF (dir);
+  Py_XDECREF (mod_sys);
+}
+
+/**
+ * Initialize system paths
+ *
+ * @param first_time - is functions calls for the first time?
+ */
+static void
+init_syspath (int first_time)
 {
   PyObject *mod;
+  wchar_t *last;
+  long n;
+
+  /* looks for the last dir separator */
+  last = last_slash (progname);
+
+  n = last - progname;
+  if (n > 0)
+    {
+      wchar_t execdir[4096];
+
+      wcsncpy (execdir, progname, MIN (n, BUF_LEN (execdir)));
+      if (execdir[n - 1] == '.')
+        {
+          n--; /*fix for when run as ./program */
+        }
+      execdir[n] = '\0';
+
+      /* append to module search path */
+      syspath_append (execdir);
+    }
+  else
+    {
+      printf( "Warning: could not determine argv[0] path\n" );
+    }
 
   printf ("Checking for installed Python... ");
   mod = PyImport_ImportModule ("site");
@@ -169,6 +287,8 @@ python_init (int argc, char **argv, struct _inittab *inittab_modules)
     {
       argc_copy = argc;
       argv_copy = argv;
+
+      MBS2WCS (progname, argv[0]);
     }
 
   Py_SetProgramName (PROGRAM_NAME);
