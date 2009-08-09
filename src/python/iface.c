@@ -581,3 +581,48 @@ py_run_script (py_script_t *script)
 
   return result;
 }
+
+/**
+ * Run specified file at specified dictionary
+ *
+ * @param file_name - name of file to run
+ * @param dict - dictionary to run on
+ * @return Python eval's result
+ */
+PyObject*
+py_run_file_at_dict (const wchar_t *file_name, PyObject *dict)
+{
+  py_script_t *script;
+  PyObject *result;
+
+  script = py_script_new_file (file_name);
+
+  if (!script)
+    {
+      return NULL;
+    }
+
+  result = py_run_script (script);
+  py_script_free (script);
+
+  return result;
+}
+
+/**
+ * Run specified file
+ *
+ * @param file_name - name of file to run
+ * @return Python eval's result
+ */
+PyObject*
+py_run_file (const wchar_t *file_name)
+{
+  PyObject *dict = create_global_dictionary ();
+  PyObject *result;
+
+  result = py_run_file_at_dict (file_name, dict);
+
+  release_global_dictionary (dict);
+
+  return result;
+}

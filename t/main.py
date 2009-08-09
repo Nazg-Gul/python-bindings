@@ -8,9 +8,10 @@ from Test import *
 print TRUE
 
 def Main(arg):
-  for i in range(10):
+  for i in range(5):
     print (arg);
   return 0;
 
 Main("1212");
 print ("Some text");
+my_method ("1212121212");

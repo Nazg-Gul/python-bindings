@@ -34,18 +34,12 @@ static struct _inittab inittab_modules[] = {
 int
 main (int argc, char **argv)
 {
-  py_script_t *script;
-
   if (python_init (argc, argv, inittab_modules))
     {
       return EXIT_FAILURE;
     }
 
-  PyImport_ImportModule ("Test");
-
-  script = py_script_new_file (L"../t/main.py");
-  py_run_script (script);
-  py_script_free (script);
+  py_run_file (L"../t/main.py");
 
   py_module_free (module);
 

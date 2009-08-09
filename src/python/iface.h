@@ -130,6 +130,14 @@ py_run_script_at_dict (py_script_t *script, PyObject *dict);
 PyObject*
 py_run_script (py_script_t *script);
 
+/* Run specified file at specified dictionary */
+PyObject*
+py_run_file_at_dict (const wchar_t *file_name, PyObject *dict);
+
+/* Run specified file */
+PyObject*
+py_run_file (const wchar_t *file_name);
+
 /****
  * Extensions
  */
