@@ -1,0 +1,22 @@
+.SILENT:
+
+top_builddir = ..
+
+include $(top_builddir)/mk/rules.mk
+include $(top_builddir)/mk/init.mk
+
+OBJECTIVE_BINS = test
+
+LIBADD = -Wl,-export-dynamic -lpython2.5 
+CFLAGS += -I$(top_builddir) -I/usr/include/python2.5
+
+HEADERS = 
+SOURCES = \
+	python/iface.c \
+	python/extpy.c \
+	python/import.c \
+	main.c
+
+OBJECTS = ${SOURCES:.c=.o}
+
+include $(top_builddir)/mk/objective.mk
