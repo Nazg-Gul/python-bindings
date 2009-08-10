@@ -69,6 +69,9 @@ BEGIN_HEADER
 #define PY_INITTAB_END_PROC \
   }
 
+#define PY_DEF_INT_CONST(name, value) \
+  py_module_add_int_constant (__module, name, value);
+
 #define PY_PARSE_TUPLE(mask, err_msg, args...)   \
   if (!PyArg_ParseTuple (__args, mask, ##args)) \
     { \
@@ -159,6 +162,14 @@ py_run_file_at_dict (const wchar_t *file_name, PyObject *dict);
 /* Run specified file */
 PyObject*
 py_run_file (const wchar_t *file_name);
+
+/****
+ * Other helpers
+ */
+
+/* Add integer constant to module */
+int
+py_module_add_int_constant (py_module_t *module, wchar_t *name, long value);
 
 /****
  * Extensions

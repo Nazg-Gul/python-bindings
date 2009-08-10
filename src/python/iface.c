@@ -713,3 +713,35 @@ py_run_file (const wchar_t *file_name)
 
   return result;
 }
+
+/****
+ * Other helpers
+ */
+
+/**
+ * Add integer constant to module
+ *
+ * @param module - module to add constant to
+ * @param name - constant's name
+ * @param value - constant's value
+ * @return -1 on error, 0 on success.
+ */
+int
+py_module_add_int_constant (py_module_t *module, wchar_t *name, long value)
+{
+  char *mbname;
+  int res;
+
+  WCS2MBS (mbname, name);
+
+  if (!name)
+    {
+      return -1;
+    }
+
+  res = PyModule_AddIntConstant (module->handle, mbname, value);
+
+  free (mbname);
+
+  return res;
+}

@@ -14,8 +14,8 @@ PY_BEGIN_METHMAP(methods)
 PY_END_METHMAP
 
 PY_INITTAB_PROC(test_init, L"Test", L"My first test module", methods)
-  PyModule_AddIntConstant (__module->handle, "TRUE", 1);
-  PyModule_AddIntConstant (__module->handle, "FALSE", 0);
+  PY_DEF_INT_CONST (L"TRUE", 1);
+  PY_DEF_INT_CONST (L"FALSE", 0);
 PY_INITTAB_END_PROC
 
 PY_BEGIN_INITTAB(inittab_modules)
