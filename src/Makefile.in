@@ -15,6 +15,7 @@ SOURCES = \
 	python/iface.c \
 	python/extpy.c \
 	python/tracer.c \
+	python/proc.c \
 	main.c
 
 OBJECTS = ${SOURCES:.c=.o}

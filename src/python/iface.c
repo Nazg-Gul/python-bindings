@@ -620,10 +620,17 @@ py_run_script_at_dict (py_script_t *script, PyObject *dict)
 {
   char *mbfn = NULL;
   PyObject *result;
+  char *filename = "";
 
   if (!script)
     {
       return NULL;
+    }
+
+  if (script->file_name)
+    {
+      WCS2MBS (mbfn, script->file_name);
+      filename = mbfn;
     }
 
   /* Compile script */
@@ -633,25 +640,21 @@ py_run_script_at_dict (py_script_t *script, PyObject *dict)
 
       WCS2MBS (mbscript, script->script);
 
-      script->compiled = Py_CompileString (mbscript, "", Py_file_input);
+      script->compiled = Py_CompileString (mbscript, filename, Py_file_input);
       free (mbscript);
 
       if (PyErr_Occurred ())
         {
           /* Compilation error occurred */
           PyErr_Print ();
+          SAFE_FREE (mbfn);
           py_script_free_compiled (script);
           return NULL;
         }
     }
 
-  if (script->file_name)
-    {
-      WCS2MBS (mbfn, script->file_name);
-    }
-
   extpy_dict_set_item_str (dict, L"__file__",
-                           PyString_FromString (mbfn ? mbfn : ""));
+                           PyString_FromString (filename));
 
   SAFE_FREE (mbfn);
 

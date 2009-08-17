@@ -75,9 +75,43 @@ py_tracer_done (void)
 }
 
 /**
+ * Truncate specified buffer
+ *
+ * @param type - type of buffer (PY_STDOUT or PY_STDERR)
+ * @return buffer from stream
+ * @sideeffect allocate memory for output value
+ */
+void
+py_tracer_truncate_buffer (int type)
+{
+  PyObject *mod_sys, *dict_sys, *stream, *truncate;
+  PyObject *result;
+
+  mod_sys = PyImport_ImportModule ("sys");
+  dict_sys = PyModule_GetDict (mod_sys);
+
+  stream =
+    PyDict_GetItemString (dict_sys,
+                          (type == PY_STDOUT ? "stdout" : "stderr"));
+
+  truncate = PyObject_GetAttrString (stream, "truncate");
+
+  if (!truncate)
+    {
+      Py_DECREF (mod_sys);
+      return;
+    }
+
+  EXTPY_VOIDCALL_OBJECT (truncate, "(i)", 0);
+
+  Py_DECREF (mod_sys);
+  Py_DECREF (truncate);
+}
+
+/**
  * Get specified buffer
  *
- * @param type - type of buffer (PY_TRACER_STDOUT or PY_TRACER_STDERR)
+ * @param type - type of buffer (PY_STDOUT or PY_STDERR)
  * @return buffer from stream
  * @sideeffect allocate memory for output value
  */
@@ -86,28 +120,33 @@ py_tracer_get_buffer (int type)
 {
   PyObject *mod_sys, *dict_sys, *stream, *getvalue;
   PyObject *result;
-  wchar_t *wcs;
+  wchar_t *wcs = NULL;
 
   mod_sys = PyImport_ImportModule ("sys");
   dict_sys = PyModule_GetDict (mod_sys);
 
   stream =
     PyDict_GetItemString (dict_sys,
-                          (type == PY_TRACER_STDOUT ? "stdout" : "stderr"));
+                          (type == PY_STDOUT ? "stdout" : "stderr"));
 
   getvalue = PyObject_GetAttrString (stream, "getvalue");
 
   if (!getvalue)
     {
+      Py_DECREF (mod_sys);
       return NULL;
     }
 
   EXTPY_CALL_OBJECT (result, getvalue, "()");
 
-  MBS2WCS (wcs, PyString_AsString (result));
+  if (result)
+    {
+      MBS2WCS (wcs, PyString_AsString (result));
+      Py_DECREF (result);
+    }
 
   Py_DECREF (mod_sys);
-  Py_DECREF (result);
+  Py_DECREF (getvalue);
 
   return wcs;
 }

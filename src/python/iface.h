@@ -78,6 +78,8 @@ BEGIN_HEADER
       return extpy_return_pyobj_error (PyExc_ValueError, err_msg); \
     }
 
+enum { PY_STDOUT = 1, PY_STDERR };
+
 /* Initialize Python sub-system */
 int
 python_init (int argc, char **argv, struct _inittab *inittab_modules);
@@ -177,6 +179,7 @@ py_module_add_int_constant (py_module_t *module, wchar_t *name, long value);
 
 #include "tracer.h"
 #include "extpy.h"
+#include "proc.h"
 
 END_HEADER
 

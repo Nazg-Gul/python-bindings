@@ -16,8 +16,8 @@
 static inline void
 fill_result_outputs (extpy_run_result_t *result)
 {
-  result->stdout = py_tracer_get_buffer (PY_TRACER_STDOUT);
-  result->stderr = py_tracer_get_buffer (PY_TRACER_STDERR);
+  result->stdout = py_tracer_get_buffer (PY_STDOUT);
+  result->stderr = py_tracer_get_buffer (PY_STDERR);
 }
 
 /**
@@ -81,6 +81,8 @@ extpy_run_file (wchar_t *filename)
 
   MALLOC_ZERO (result, sizeof (extpy_run_result_t));
 
+  py_tracer_truncate_buffer (PY_STDOUT);
+  py_tracer_truncate_buffer (PY_STDERR);
   result->result = py_run_file (filename);
   fill_result_outputs (result);
 
@@ -101,6 +103,8 @@ extpy_run_script (py_script_t *script)
 
   MALLOC_ZERO (result, sizeof (extpy_run_result_t));
 
+  py_tracer_truncate_buffer (PY_STDOUT);
+  py_tracer_truncate_buffer (PY_STDERR);
   result->result = py_run_script (script);
   fill_result_outputs (result);
 
@@ -127,4 +131,5 @@ extpy_run_free (extpy_run_result_t* result)
 
   SAFE_FREE (result->stdout);
   SAFE_FREE (result->stderr);
+  SAFE_FREE (result);
 }

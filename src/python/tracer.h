@@ -11,8 +11,6 @@
 #  error "Do not include this file directly. Include iface.h instead."
 #endif
 
-enum { PY_TRACER_STDOUT = 1, PY_TRACER_STDERR };
-
 /* Initialize tracing stuff */
 int
 py_tracer_init (void);
@@ -20,6 +18,10 @@ py_tracer_init (void);
 /* Uninitialize tracing stuff */
 void
 py_tracer_done (void);
+
+/* Truncate specified buffer */
+void
+py_tracer_truncate_buffer (int type);
 
 /* Get specified buffer */
 wchar_t*

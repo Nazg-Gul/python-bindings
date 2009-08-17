@@ -6,7 +6,7 @@ PY_METHOD(my_method)
 
   PY_PARSE_TUPLE ("s", L"Method expects one string argument", &s);
 
-  printf ("Method `my_method`: %s\n", s);
+  py_proc_write (PY_STDOUT, L"Method `my_method`: %s", s);
 PY_METH_END
 
 PY_BEGIN_METHMAP(methods)

@@ -14,8 +14,19 @@
 #define EXTPY_CALL_OBJECT(result, object, format, args...) \
   { \
     PyObject *o_args = Py_BuildValue (format, ##args); \
-    result = PyEval_CallObject (getvalue, o_args); \
+    result = PyEval_CallObject (object, o_args); \
     Py_DECREF (o_args); \
+  }
+
+#define EXTPY_VOIDCALL_OBJECT(object, format, args...) \
+  { \
+    PyObject *o_args = Py_BuildValue (format, ##args), *result; \
+    result = PyEval_CallObject (object, o_args); \
+    Py_DECREF (o_args); \
+    if (result) \
+      { \
+        Py_DECREF (result); \
+      } \
   }
 
 typedef struct {
