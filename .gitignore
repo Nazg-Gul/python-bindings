@@ -16,3 +16,4 @@ src/.depend-done
 src/Makefile
 src/test
 stamp-h1
+*~

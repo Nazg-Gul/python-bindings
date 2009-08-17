@@ -14,6 +14,7 @@ HEADERS =
 SOURCES = \
 	python/iface.c \
 	python/extpy.c \
+	python/tracer.c \
 	main.c
 
 OBJECTS = ${SOURCES:.c=.o}

@@ -25,12 +25,19 @@ PY_END_INITTAB
 int
 main (int argc, char **argv)
 {
+  extpy_run_result_t* result;
+
   if (python_init (argc, argv, inittab_modules))
     {
       return EXIT_FAILURE;
     }
 
-  py_run_file (L"../t/main.py");
+  result = extpy_run_file (L"../t/main.py");
+
+  printf ("Buffer from stdout:\n%ls", result->stdout);
+  printf ("\nBuffer from stderr:\n%ls", result->stderr);
+
+  extpy_run_free (result);
 
   python_done ();
 

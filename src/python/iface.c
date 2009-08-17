@@ -403,6 +403,11 @@ python_init (int argc, char **argv, struct _inittab *inittab_modules)
 
   init_syspath (first_time);
 
+  if (py_tracer_init ())
+    {
+      return -1;
+    }
+
   return 0;
 }
 
@@ -412,6 +417,8 @@ python_init (int argc, char **argv, struct _inittab *inittab_modules)
 void
 python_done (void)
 {
+  py_tracer_done ();
+
   unregister_all_modules ();
 
   /* End python */
@@ -612,6 +619,7 @@ PyObject*
 py_run_script_at_dict (py_script_t *script, PyObject *dict)
 {
   char *mbfn = NULL;
+  PyObject *result;
 
   if (!script)
     {
@@ -647,7 +655,15 @@ py_run_script_at_dict (py_script_t *script, PyObject *dict)
 
   SAFE_FREE (mbfn);
 
-  return PyEval_EvalCode ((PyCodeObject*)script->compiled, dict, dict);
+  PyErr_Clear ();
+  result = PyEval_EvalCode ((PyCodeObject*)script->compiled, dict, dict);
+
+  if (PyErr_Occurred ())
+    {
+      PyErr_Print ();
+    }
+
+  return result;
 }
 
 /**

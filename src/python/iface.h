@@ -175,6 +175,7 @@ py_module_add_int_constant (py_module_t *module, wchar_t *name, long value);
  * Extensions
  */
 
+#include "tracer.h"
 #include "extpy.h"
 
 END_HEADER
