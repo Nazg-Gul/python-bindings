@@ -10,6 +10,30 @@
 #include "iface.h"
 #include <wchar.h>
 
+#define _GET_FIELD_VALUE(err_val, check_cond, cast) \
+  PyObject *field; \
+   \
+  if (!obj || !attr_name) \
+    { \
+      return err_val; \
+    } \
+ \
+  field = extpy_get_attr_string (obj, attr_name); \
+ \
+  if (!field) \
+    { \
+      return err_val; \
+    } \
+ \
+  if (!(check_cond)) \
+    { \
+      return err_val; \
+    } \
+  \
+  result = cast (field); \
+  Py_DECREF (field);
+
+
 /**
  * Fill stdout and stderr fields of running result
  */
@@ -132,4 +156,160 @@ extpy_run_free (extpy_run_result_t* result)
   SAFE_FREE (result->stdout);
   SAFE_FREE (result->stderr);
   SAFE_FREE (result);
+}
+
+/****
+ * Object's attributes manipulation
+ */
+
+/**
+ * Retrieve an attribute from object
+ *
+ * @param obj - object to get attr of
+ * @param attr_name - name of attribute to get
+ * @return attribute's value
+ */
+PyObject*
+extpy_get_attr_string (PyObject *obj, const wchar_t *attr_name)
+{
+  char *mbname;
+  PyObject *result;
+
+  if (!obj || !attr_name)
+    {
+      return NULL;
+    }
+
+  WCS2MBS (mbname, attr_name);
+
+  if (!mbname)
+    {
+      return NULL;
+    }
+
+  result = PyObject_GetAttrString (obj, mbname);
+
+  free (mbname);
+
+  return result;
+}
+
+/**
+ * Set the value of an attribute
+ *
+ * @param obj - object to set attribute of
+ * @param attr_name - name of attribute to set
+ * @param val - new value of attribute
+ */
+int
+extpy_set_attr_string (PyObject *obj, const wchar_t *attr_name, PyObject *val)
+{
+  char *mbname;
+  int result;
+
+  if (!obj || !attr_name)
+    {
+      return -1;
+    }
+
+  WCS2MBS (mbname, attr_name);
+
+  if (!mbname)
+    {
+      return -1;
+    }
+
+  result = PyObject_SetAttrString (obj, mbname, val);
+
+  free (mbname);
+
+  return result;
+}
+
+/**
+ * Check if object has specified attribute
+ *
+ * @param obj - object to check attribute of
+ * @param attr_name - name of attribute to check
+ * @return zero if there is no such attribute in object, non-zero otherwise
+ */
+int
+extpy_has_attr_string (PyObject *obj, const wchar_t *attr_name)
+{
+  char *mbname;
+  int result;
+
+  if (!obj || !attr_name)
+    {
+      return 0;
+    }
+
+  WCS2MBS (mbname, attr_name);
+
+  if (!mbname)
+    {
+      return 0;
+    }
+
+  result = PyObject_HasAttrString (obj, mbname);
+
+  free (mbname);
+
+  return result;
+}
+
+/**
+ * Get long-value object's attribute
+ *
+ * @param obj - object to get attribute's value of
+ * @param attr_name - name of attribute
+ * @return specified attribute's value
+ */
+long
+extpy_get_long_attr (PyObject *obj, const wchar_t *attr_name)
+{
+  long result;
+
+  _GET_FIELD_VALUE (0, (PyInt_Check (field) || PyLong_Check (field)),
+                    PyLong_AsLong);
+
+  return result;
+}
+
+/**
+ * Get double-value object's attribute
+ *
+ * @param obj - object to get attribute's value of
+ * @param attr_name - name of attribute
+ * @return specified attribute's value
+ */
+double
+extpy_get_double_attr (PyObject *obj, const wchar_t *attr_name)
+{
+  double result;
+
+  _GET_FIELD_VALUE (0, PyFloat_Check (field), PyFloat_AsDouble);
+
+  return result;
+}
+
+/**
+ * Get string-value object's attribute
+ *
+ * @param obj - object to get attribute's value of
+ * @param attr_name - name of attribute
+ * @return specified attribute's value
+ * @sideeffect allocate memory for output value
+ */
+wchar_t*
+extpy_get_string_attr (PyObject *obj, const wchar_t *attr_name)
+{
+  char *result;
+  wchar_t *wcs_result;
+
+  _GET_FIELD_VALUE (NULL, PyString_Check (field), PyString_AsString);
+
+  MBS2WCS (wcs_result, result);
+
+  return wcs_result;
 }

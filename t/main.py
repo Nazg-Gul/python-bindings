@@ -1,22 +1,12 @@
 #!/usr/bin/python
 
-import math
-import Test
-from math import *
-from Test import *
+import Test;
 
-print TRUE
-print __file__
+class A:
+  pass
 
-def Main(arg):
-  for i in range(5):
-    print (arg);
-  return 0;
+A.longField = 314
+A.floatField = 3.14
+A.stringField = "Some string field"
 
-Main("1212");
-print ("Some text");
-my_method ("1212121212\n");
-
-syspathAppend("../t")
-
-import module
+Test.my_method(A)

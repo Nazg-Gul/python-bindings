@@ -2,11 +2,22 @@
 #include "python/iface.h"
 
 PY_METHOD(my_method)
-  char *s;
+  PyObject *o;
+  wchar_t *v;
 
-  PY_PARSE_TUPLE ("s", L"Method expects one string argument", &s);
+  PY_PARSE_TUPLE ("O", L"Method expects one object argument", &o);
 
-  py_proc_write (PY_STDOUT, L"Method `my_method`: %s", s);
+  v = extpy_get_string_attr (o, L"stringField");
+
+  py_proc_write (PY_STDOUT, L"longField: %ld\n",
+                 extpy_get_long_attr (o, L"longField"));
+
+  py_proc_write (PY_STDOUT, L"floatField: %lf\n",
+                 extpy_get_double_attr (o, L"floatField"));
+
+  py_proc_write (PY_STDOUT, L"stringField: %ls\n", v);
+
+  free (v);
 PY_METH_END
 
 PY_BEGIN_METHMAP(methods)
@@ -32,10 +43,8 @@ main (int argc, char **argv)
     }
 
   result = extpy_run_file (L"../t/main.py");
-
   printf ("Buffer from stdout:\n%ls", result->stdout);
   printf ("\nBuffer from stderr:\n%ls", result->stderr);
-
   extpy_run_free (result);
 
   python_done ();

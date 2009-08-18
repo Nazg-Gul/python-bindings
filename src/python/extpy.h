@@ -55,3 +55,31 @@ extpy_run_script (py_script_t *script);
 /* Free running results */
 void
 extpy_run_free (extpy_run_result_t* result);
+
+/****
+ * Object's attributes manipulation
+ */
+
+/* Retrieve an attribute from object */
+PyObject*
+extpy_get_attr_string (PyObject *obj, const wchar_t *attr_name);
+
+/* Set the value of an attribute */
+int
+extpy_set_attr_string (PyObject *obj, const wchar_t *attr_name, PyObject *val);
+
+/* Check if object has specified attribute */
+int
+extpy_has_attr_string (PyObject *obj, const wchar_t *attr_name);
+
+/* Get long-value object's attribute */
+long
+extpy_get_long_attr (PyObject *obj, const wchar_t *attr_name);
+
+/* Get double-value object's attribute */
+double
+extpy_get_double_attr (PyObject *obj, const wchar_t *attr_name);
+
+/* Get string-value object's attribute */
+wchar_t*
+extpy_get_string_attr (PyObject *obj, const wchar_t *attr_name);
