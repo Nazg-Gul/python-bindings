@@ -15,4 +15,8 @@ def Main(arg):
 
 Main("1212");
 print ("Some text");
-my_method ("1212121212");
+my_method ("1212121212\n");
+
+syspathAppend("../t")
+
+import module

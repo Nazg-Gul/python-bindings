@@ -173,6 +173,10 @@ py_run_file (const wchar_t *file_name);
 int
 py_module_add_int_constant (py_module_t *module, wchar_t *name, long value);
 
+/* Append entry to system directory */
+void
+py_syspath_append (wchar_t *dirname);
+
 /****
  * Extensions
  */
@@ -180,6 +184,7 @@ py_module_add_int_constant (py_module_t *module, wchar_t *name, long value);
 #include "tracer.h"
 #include "extpy.h"
 #include "proc.h"
+#include "builtins.h"
 
 END_HEADER
 

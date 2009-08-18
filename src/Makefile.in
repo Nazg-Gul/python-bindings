@@ -16,8 +16,12 @@ SOURCES = \
 	python/extpy.c \
 	python/tracer.c \
 	python/proc.c \
+	python/builtins.c \
 	main.c
 
 OBJECTS = ${SOURCES:.c=.o}
 
 include $(top_builddir)/mk/objective.mk
+
+clean-prehook:
+	@rm -f python/*.o

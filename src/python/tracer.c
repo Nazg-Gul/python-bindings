@@ -85,7 +85,6 @@ void
 py_tracer_truncate_buffer (int type)
 {
   PyObject *mod_sys, *dict_sys, *stream, *truncate;
-  PyObject *result;
 
   mod_sys = PyImport_ImportModule ("sys");
   dict_sys = PyModule_GetDict (mod_sys);

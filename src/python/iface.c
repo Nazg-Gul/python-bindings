@@ -125,7 +125,7 @@ last_slash (const wchar_t *string)
 
 
 /**
- * Append entry to sis directory
+ * Append entry to system directory
  *
  * @param dirname - name of directory to append
  */
@@ -260,7 +260,7 @@ create_global_dictionary (void)
 {
   PyObject *dict = PyDict_New ();
 
-  PyDict_SetItemString (dict, "__builtins__", PyEval_GetBuiltins ());
+  PyDict_SetItemString (dict, "__builtins__", py_builtins_get ());
   extpy_dict_set_item_str (dict, L"__name__",
                            PyString_FromString ( "__main__" ));
 
@@ -408,6 +408,10 @@ python_init (int argc, char **argv, struct _inittab *inittab_modules)
       return -1;
     }
 
+  if (!py_builtins_init ())
+    {
+    }
+
   return 0;
 }
 
@@ -417,6 +421,7 @@ python_init (int argc, char **argv, struct _inittab *inittab_modules)
 void
 python_done (void)
 {
+  py_builtins_done ();
   py_tracer_done ();
 
   unregister_all_modules ();
@@ -763,4 +768,15 @@ py_module_add_int_constant (py_module_t *module, wchar_t *name, long value)
   free (mbname);
 
   return res;
+}
+
+/**
+ * Append entry to system directory
+ *
+ * @param dirname - name of directory to append
+ */
+void
+py_syspath_append (wchar_t *dirname)
+{
+  syspath_append (dirname);
 }
