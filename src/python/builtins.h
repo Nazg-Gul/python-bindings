@@ -20,6 +20,10 @@ py_builtins_init (void);
 void
 py_builtins_done (void);
 
-/* Return a dictionary of the builtins */
+/* Return a global dictionary of the builtins */
 PyObject*
-py_builtins_get (void);
+py_builtins_get_global (void);
+
+/* Return a local dictionary of the builtins */
+PyObject*
+py_builtins_get_local (void);

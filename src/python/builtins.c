@@ -10,7 +10,8 @@
 
 #include "iface.h"
 
-static PyObject *builtins = NULL;
+static PyObject *global_builtins = NULL;
+static PyObject *mod_corebuilt = NULL;
 
 PY_METHOD(syspath_append)
   char *dirname;
@@ -46,15 +47,11 @@ PY_INITTAB_END_PROC
 int
 py_builtins_init (void)
 {
-  PyObject *mod;
-
+  /* CoreBuiltins module initialization */
   builtins_init ();
-  mod = PyImport_ImportModule ("CoreBuiltins");
+  mod_corebuilt = PyImport_ImportModule ("CoreBuiltins");
 
-  builtins = PyDict_Copy (PyEval_GetBuiltins ());
-  PyDict_Merge (builtins, PyModule_GetDict (mod), 0);
-
-  Py_DECREF (mod);
+  global_builtins = PyEval_GetBuiltins ();
 
   return 0;
 }
@@ -65,16 +62,27 @@ py_builtins_init (void)
 void
 py_builtins_done (void)
 {
-  Py_DECREF (builtins);
+  Py_DECREF (mod_corebuilt);
 }
 
 /**
- * Return a dictionary of the builtins
+ * Return a global dictionary of the builtins
  *
  * @return dictionary of builtins
  */
 PyObject*
-py_builtins_get (void)
+py_builtins_get_global (void)
 {
-  return builtins;
+  return global_builtins;
+}
+
+/**
+ * Return a local dictionary of the builtins
+ *
+ * @return dictionary of builtins
+ */
+PyObject*
+py_builtins_get_local (void)
+{
+  return PyModule_GetDict (mod_corebuilt);
 }

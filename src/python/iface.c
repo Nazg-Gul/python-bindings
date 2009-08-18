@@ -260,9 +260,11 @@ create_global_dictionary (void)
 {
   PyObject *dict = PyDict_New ();
 
-  PyDict_SetItemString (dict, "__builtins__", py_builtins_get ());
+  PyDict_SetItemString (dict, "__builtins__", py_builtins_get_global ());
   extpy_dict_set_item_str (dict, L"__name__",
                            PyString_FromString ( "__main__" ));
+
+  PyDict_Merge (dict, py_builtins_get_local (), 0);
 
   return dict;
 }
