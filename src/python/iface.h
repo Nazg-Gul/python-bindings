@@ -1,5 +1,5 @@
 /**
- * Copyright 2008 Sergey I. Sharybin <g.ulairi@gmail.com>
+ * Copyright 2009 Sergey I. Sharybin <g.ulairi@gmail.com>
  *
  * Interface header for Python sub-system
  *
